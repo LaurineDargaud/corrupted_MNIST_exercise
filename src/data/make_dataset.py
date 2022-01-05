@@ -22,7 +22,7 @@ def main(input_filepath, output_filepath):
     # export TRAIN dataset
     # to tensor
     all_torch_images, all_torch_labels = [], []
-    for i in range(5):
+    for i in range(8):
         file_path = input_filepath + "/train_{}.npz".format(i)
         np_array = np.load(file_path)
         all_torch_images.append(torch.from_numpy(np_array["images"]))
