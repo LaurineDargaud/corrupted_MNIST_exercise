@@ -1,14 +1,14 @@
 import torch.nn.functional as F
 from torch import nn
 
-import hydra
+from omegaconf import OmegaConf
 
 class MyAwesomeModel(nn.Module):
-    @hydra.main(config_path="config/",config_name="model_conf.yaml")
-    def __init__(self, cfg):
+    def __init__(self):
         super().__init__()
         # get hyperparameters
-        hparams = cfg.hyperparameters
+        config = OmegaConf.load('src/config/model_conf.yaml')
+        hparams = config.hyperparameters
         self.fc1 = nn.Linear(hparams['input_size'], hparams['layer1_size'])
         # self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(hparams['layer1_size'], hparams['layer2_size'])

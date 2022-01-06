@@ -7,8 +7,7 @@ import torch
 from model import MyAwesomeModel
 from torch.utils.data import DataLoader
 
-import hydra
-import logging
+from omegaconf import OmegaConf
 
 class train_model(object):
     """
@@ -16,12 +15,14 @@ class train_model(object):
     then generate the plot of training loss VS steps
     """
 
-    @hydra.main(config_path="config/",config_name="training_conf.yaml")
-    def __init__(self, training_cfg):
-        self.hparams = training_cfg.hyperparameters
+    def __init__(self):
+        # loading training configuration
+        config = OmegaConf.load('src/config/training_conf.yaml')
+        self.hparams = config.hyperparameters
+
         self.train()
 
-    def train(self, ):
+    def train(self):
         print("Training day and night")
         parser = argparse.ArgumentParser(description="Training arguments")
         parser.add_argument("--lr", default=self.hparams['lr'], type=float)

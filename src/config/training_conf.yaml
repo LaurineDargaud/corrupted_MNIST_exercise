@@ -4,4 +4,4 @@ hyperparameters:
   save_file: 'best_model'
   criterion: 'NLLLoss'
   optimizer: 'SGD'
-  btach_size: 1000
+  batch_size: 1000
