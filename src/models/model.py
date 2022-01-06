@@ -1,17 +1,21 @@
 import torch.nn.functional as F
 from torch import nn
 
+import hydra
 
 class MyAwesomeModel(nn.Module):
-    def __init__(self):
+    @hydra.main(config_path="config/",config_name="model_conf.yaml")
+    def __init__(self, cfg):
         super().__init__()
-        self.fc1 = nn.Linear(784, 128)
+        # get hyperparameters
+        hparams = cfg.hyperparameters
+        self.fc1 = nn.Linear(hparams['input_size'], hparams['layer1_size'])
         # self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, 64)
-        self.fc4 = nn.Linear(64, 10)
+        self.fc3 = nn.Linear(hparams['layer1_size'], hparams['layer2_size'])
+        self.fc4 = nn.Linear(hparams['layer2_size'], hparams['output_size'])
 
         # Dropout module with 0.2 drop probability
-        self.dropout = nn.Dropout(p=0.2)
+        self.dropout = nn.Dropout(p=hparams['p_dropout'])
 
     def forward(self, x):
         # make sure input tensor is flattened

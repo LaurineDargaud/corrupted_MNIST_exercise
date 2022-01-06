@@ -7,6 +7,8 @@ import torch
 from model import MyAwesomeModel
 from torch.utils.data import DataLoader
 
+import hydra
+import logging
 
 class train_model(object):
     """
@@ -14,18 +16,20 @@ class train_model(object):
     then generate the plot of training loss VS steps
     """
 
-    def __init__(self):
+    @hydra.main(config_path="config/",config_name="training_conf.yaml")
+    def __init__(self, training_cfg):
+        self.hparams = training_cfg.hyperparameters
         self.train()
 
-    def train(self):
+    def train(self, ):
         print("Training day and night")
         parser = argparse.ArgumentParser(description="Training arguments")
-        parser.add_argument("--lr", default=0.1, type=float)
+        parser.add_argument("--lr", default=self.hparams['lr'], type=float)
         # add any additional argument that you want
-        parser.add_argument("--nb_epochs", default=200, type=int)
-        parser.add_argument("--save_file", default="best_model")
-        parser.add_argument("--criterion", default="NLLLoss")
-        parser.add_argument("--optimizer", default="SGD")
+        parser.add_argument("--nb_epochs", default=self.hparams['nb_epochs'], type=int)
+        parser.add_argument("--save_file", default=self.hparams['save_file'])
+        parser.add_argument("--criterion", default=self.hparams['criterion'])
+        parser.add_argument("--optimizer", default=self.hparams['optimizer'])
         args = parser.parse_args(sys.argv[1:])
         print(args)
 
@@ -37,7 +41,7 @@ class train_model(object):
         train_dataset = torch.load(
             os.path.abspath(__file__ + "/../../../data/processed/train_dataset.pth")
         )
-        trainloader = DataLoader(train_dataset, batch_size=1000, shuffle=True)
+        trainloader = DataLoader(train_dataset, batch_size=self.hparams['batch_size'], shuffle=True)
 
         criterion = eval(f"torch.nn.{args.criterion}()")
         optimizer = eval(
@@ -73,6 +77,8 @@ class train_model(object):
             # save best model
             if best_loss is None or running_loss < best_loss:
                 best_loss = running_loss
+                # create 'models' folder if it doesn't exist
+                os.makedirs("models/", exist_ok=True)
                 saving_path = os.path.abspath(
                     __file__ + "/../../../models/" + f"{args.save_file}.pth"
                 )
@@ -86,6 +92,8 @@ class train_model(object):
                 f"Training Loss evolution using {args.criterion} criterion,{args.optimizer} optimizer and {args.nb_epochs} epochs",
                 size=10,
             )
+            # create 'reports/figures' folder if it doesn't exist
+            os.makedirs("reports/figures/", exist_ok=True)
             plt.savefig(
                 os.path.abspath(
                     __file__ + "/../../../reports/figures/training_loss_plot.png"

@@ -8,11 +8,17 @@ import torch
 from dotenv import find_dotenv, load_dotenv
 from torch.utils.data import TensorDataset
 
+from omegaconf import OmegaConf
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
 def main(input_filepath, output_filepath):
+
+    # loading nb_files in configuration
+    config = OmegaConf.load('src/config/data_conf.yaml')
+    nb_files = config.nb_files
+
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
     """
@@ -22,7 +28,7 @@ def main(input_filepath, output_filepath):
     # export TRAIN dataset
     # to tensor
     all_torch_images, all_torch_labels = [], []
-    for i in range(8):
+    for i in range(nb_files):
         file_path = input_filepath + "/train_{}.npz".format(i)
         np_array = np.load(file_path)
         all_torch_images.append(torch.from_numpy(np_array["images"]))
