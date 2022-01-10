@@ -9,6 +9,10 @@ from torch.utils.data import DataLoader
 
 from omegaconf import OmegaConf
 
+import wandb
+wandb.init()
+
+
 class train_model(object):
     """
     Train model on train dataset
@@ -37,6 +41,9 @@ class train_model(object):
         # TODO: Implement training loop here
         # get model
         model = MyAwesomeModel()
+
+        # logging with wandb
+        wandb.watch(model)
 
         # get training dataset
         train_dataset = torch.load(
@@ -72,6 +79,10 @@ class train_model(object):
                 running_loss += loss.item()
 
             loss_tracking[steps] = running_loss
+
+            # logging loss
+            wandb.log({"loss": running_loss})
+
             steps += 1
             print(f"Epoch {e+1}/{epochs}...   Loss: {running_loss}")
 
