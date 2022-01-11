@@ -73,6 +73,10 @@ class MyAwesomeModel(LightningModule):
         data, target = batch
         preds = self(data)
         loss = self.criterium(preds, target)
+        # compute and log training metrics
+        loss, acc = self._shared_eval_step(batch, batch_idx)
+        metrics = {"train_acc":acc, "train_loss":loss}
+        self.log_dict(metrics)
         return loss
     
     def configure_optimizers(self):

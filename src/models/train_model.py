@@ -59,12 +59,13 @@ class train_model(object):
 
         # set a callback type checkpoint
         checkpoint_callback = ModelCheckpoint(
-            monitor = 'val_loss', dirpath="./models", mode="min", verbose=True
+            monitor = 'train_loss', dirpath="./models", mode="min", verbose=True
         )
+        checkpoint_callback.FILE_EXTENSION = '.pth'
 
         # set a callback type earlystop
         early_stopping_callback = EarlyStopping(
-            monitor="val_loss", patience=3, verbose=True, mode="min"
+            monitor="train_loss", patience=3, verbose=True, mode="min"
         )
 
         # train
@@ -76,6 +77,16 @@ class train_model(object):
             logger=WandbLogger(project="corrupted_MNIST_exercise-src_models")
         )
         trainer.fit(model, trainloader)
+
+        # save best model
+        best_model = checkpoint_callback.best_model_path
+        best_model_filepath = "./models/" + f"{args.save_file}.pth"
+        # create 'models' folder if it doesn't exist
+        os.makedirs("models/", exist_ok=True)
+        print('here',type(torch.load(best_model)))
+        torch.save(torch.load(best_model), best_model_filepath)
+        
+
 
 if __name__ == "__main__":
     train_model()
