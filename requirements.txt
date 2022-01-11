@@ -13,3 +13,4 @@ matplotlib
 numpy
 pytorch-lightning
 wandb
+omegaconf
