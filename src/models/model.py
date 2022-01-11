@@ -1,7 +1,9 @@
 from pytorch_lightning import LightningModule
 
+import torch
 import torch.nn.functional as F
 from torch import nn, optim
+from torch import Tensor
 
 from omegaconf import OmegaConf
 
@@ -28,7 +30,11 @@ class MyAwesomeModel(LightningModule):
         self.optimizer = anOptimizer
         self.lr = aLrCoeff
 
-    def forward(self, x):
+    def forward(self, x: Tensor):
+        if x.ndim != 3:
+            raise ValueError('Expected input to a 3D tensor')
+        if x.shape[1] != 28 or x.shape[2] != 28 :
+            raise ValueError('Expected each sample to have shape [28, 28]')
         # make sure input tensor is flattened
         x = x.view(x.shape[0], -1)
 
@@ -102,4 +108,6 @@ class MyAwesomeModel(LightningModule):
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         data, _ = batch
         preds = self(data)
-        return preds
+        probas = torch.exp(preds)
+        _, top_class = probas.topk(1, dim=1)
+        return top_class
