@@ -9,8 +9,12 @@ from torch.utils.data import DataLoader
 
 from omegaconf import OmegaConf
 
-import wandb
-wandb.init()
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.loggers import WandbLogger
+
+# import wandb
+# wandb.init()
 
 
 class train_model(object):
@@ -40,10 +44,12 @@ class train_model(object):
 
         # TODO: Implement training loop here
         # get model
-        model = MyAwesomeModel()
+        optimizer = eval(f"torch.optim.{args.optimizer}")
+        criterion = eval(f"torch.nn.{args.criterion}()")
+        model = MyAwesomeModel(criterion, optimizer, args.lr)
 
         # logging with wandb
-        wandb.watch(model)
+        # wandb.watch(model)
 
         # get training dataset
         train_dataset = torch.load(
@@ -51,67 +57,25 @@ class train_model(object):
         )
         trainloader = DataLoader(train_dataset, batch_size=self.hparams['batch_size'], shuffle=True)
 
-        criterion = eval(f"torch.nn.{args.criterion}()")
-        optimizer = eval(
-            f"torch.optim.{args.optimizer}(model.parameters(), lr = {args.lr})"
+        # set a callback type checkpoint
+        checkpoint_callback = ModelCheckpoint(
+            monitor = 'val_loss', dirpath="./models", mode="min", verbose=True
         )
 
-        epochs = args.nb_epochs
-        steps = 0
+        # set a callback type earlystop
+        early_stopping_callback = EarlyStopping(
+            monitor="val_loss", patience=3, verbose=True, mode="min"
+        )
 
-        loss_tracking = {}
-        best_loss = None
-
-        for e in range(epochs):
-            running_loss = 0
-            for images, labels in trainloader:
-
-                # set model to train mode
-                model = model.train()
-
-                optimizer.zero_grad()
-
-                log_ps = model(images)
-                loss = criterion(log_ps, labels)
-                loss.backward()
-                optimizer.step()
-
-                running_loss += loss.item()
-
-            loss_tracking[steps] = running_loss
-
-            # logging loss
-            wandb.log({"loss": running_loss})
-
-            steps += 1
-            print(f"Epoch {e+1}/{epochs}...   Loss: {running_loss}")
-
-            # save best model
-            if best_loss is None or running_loss < best_loss:
-                best_loss = running_loss
-                # create 'models' folder if it doesn't exist
-                os.makedirs("models/", exist_ok=True)
-                saving_path = os.path.abspath(
-                    __file__ + "/../../../models/" + f"{args.save_file}.pth"
-                )
-                torch.save(model, saving_path)
-
-            # save figure with training loss VS steps
-            plt.plot(list(loss_tracking.keys()), list(loss_tracking.values()))
-            plt.xlabel("Steps")
-            plt.ylabel("Training Loss")
-            plt.title(
-                f"Training Loss evolution using {args.criterion} criterion,{args.optimizer} optimizer and {args.nb_epochs} epochs",
-                size=10,
-            )
-            # create 'reports/figures' folder if it doesn't exist
-            os.makedirs("reports/figures/", exist_ok=True)
-            plt.savefig(
-                os.path.abspath(
-                    __file__ + "/../../../reports/figures/training_loss_plot.png"
-                )
-            )
-
+        # train
+        trainer = Trainer(
+            default_root_dir=os.getcwd(), 
+            max_epochs=args.nb_epochs, 
+            limit_train_batches=0.2,
+            callbacks=[checkpoint_callback, early_stopping_callback],
+            logger=WandbLogger(project="corrupted_MNIST_exercise-src_models")
+        )
+        trainer.fit(model, trainloader)
 
 if __name__ == "__main__":
     train_model()

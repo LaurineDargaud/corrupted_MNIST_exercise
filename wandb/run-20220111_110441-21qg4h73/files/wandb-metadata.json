@@ -1,0 +1,22 @@
+{
+    "os": "Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "python": "3.9.7",
+    "heartbeatAt": "2022-01-11T10:04:43.228636",
+    "startedAt": "2022-01-11T10:04:41.900206",
+    "docker": null,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/versatisle/corrupted_MNIST_exercise/src/models/train_model.py",
+    "codePath": "src/models/train_model.py",
+    "git": {
+        "remote": "https://github.com/LaurineDargaud/corrupted_MNIST_exercise.git",
+        "commit": "eed46ffba7337ca9e85d3f5c4706c865a0e4d6b9"
+    },
+    "email": "dargaud.laurine@gmail.com",
+    "root": "/home/versatisle/corrupted_MNIST_exercise",
+    "host": "DESKTOP-5F17QBM",
+    "username": "versatisle",
+    "executable": "/home/versatisle/anaconda3/envs/pytorch_env/bin/python3"
+}
