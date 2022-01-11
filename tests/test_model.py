@@ -8,6 +8,7 @@ import pytest
 
 from pytorch_lightning import Trainer
 
+@pytest.mark.skipif(not os.path.exists(f'{_PATH_DATA}/processed/test_dataset.pth'), reason="Data files not found")
 def test_input_output_model_shapes():
     " Check for a given input with shape X that the output of the model have shape Y"
     # load model

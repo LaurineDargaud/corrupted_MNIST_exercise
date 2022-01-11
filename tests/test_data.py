@@ -18,6 +18,7 @@ def test_load_training_data():
     # check that all labels are represented
     assert list(sorted(set(train_labels))) == [i for i in range (10)], "All labels must be represented"
 
+@pytest.mark.skipif(not os.path.exists(f'{_PATH_DATA}/processed/test_dataset.pth'), reason="Data files not found")
 def test_load_test_data():
     # load test data
     test_dataset = torch.load(f'{_PATH_DATA}/processed/test_dataset.pth')
