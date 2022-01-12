@@ -2,7 +2,6 @@ import argparse
 import os
 import sys
 
-import matplotlib.pyplot as plt
 import torch
 from model import MyAwesomeModel
 from torch.utils.data import DataLoader
@@ -25,7 +24,7 @@ class train_model(object):
 
     def __init__(self):
         # loading training configuration
-        config = OmegaConf.load('src/config/training_conf.yaml')
+        config = OmegaConf.load("src/config/training_conf.yaml")
         self.hparams = config.hyperparameters
 
         self.train()
@@ -33,12 +32,12 @@ class train_model(object):
     def train(self):
         print("Training day and night")
         parser = argparse.ArgumentParser(description="Training arguments")
-        parser.add_argument("--lr", default=self.hparams['lr'], type=float)
+        parser.add_argument("--lr", default=self.hparams["lr"], type=float)
         # add any additional argument that you want
-        parser.add_argument("--nb_epochs", default=self.hparams['nb_epochs'], type=int)
-        parser.add_argument("--save_file", default=self.hparams['save_file'])
-        parser.add_argument("--criterion", default=self.hparams['criterion'])
-        parser.add_argument("--optimizer", default=self.hparams['optimizer'])
+        parser.add_argument("--nb_epochs", default=self.hparams["nb_epochs"], type=int)
+        parser.add_argument("--save_file", default=self.hparams["save_file"])
+        parser.add_argument("--criterion", default=self.hparams["criterion"])
+        parser.add_argument("--optimizer", default=self.hparams["optimizer"])
         args = parser.parse_args(sys.argv[1:])
         print(args)
 
@@ -55,13 +54,15 @@ class train_model(object):
         train_dataset = torch.load(
             os.path.abspath(__file__ + "/../../../data/processed/train_dataset.pth")
         )
-        trainloader = DataLoader(train_dataset, batch_size=self.hparams['batch_size'], shuffle=True)
+        trainloader = DataLoader(
+            train_dataset, batch_size=self.hparams["batch_size"], shuffle=True
+        )
 
         # set a callback type checkpoint
         checkpoint_callback = ModelCheckpoint(
-            monitor = 'train_loss', dirpath="./models", mode="min", verbose=True
+            monitor="train_loss", dirpath="./models", mode="min", verbose=True
         )
-        checkpoint_callback.FILE_EXTENSION = '.pth'
+        checkpoint_callback.FILE_EXTENSION = ".pth"
 
         # set a callback type earlystop
         early_stopping_callback = EarlyStopping(
@@ -70,11 +71,11 @@ class train_model(object):
 
         # train
         trainer = Trainer(
-            default_root_dir=os.getcwd(), 
-            max_epochs=args.nb_epochs, 
+            default_root_dir=os.getcwd(),
+            max_epochs=args.nb_epochs,
             limit_train_batches=0.2,
             callbacks=[checkpoint_callback, early_stopping_callback],
-            logger=WandbLogger(project="corrupted_MNIST_exercise-src_models")
+            logger=WandbLogger(project="corrupted_MNIST_exercise-src_models"),
         )
         trainer.fit(model, trainloader)
 
@@ -83,9 +84,8 @@ class train_model(object):
         best_model_filepath = "./models/" + f"{args.save_file}.pth"
         # create 'models' folder if it doesn't exist
         os.makedirs("models/", exist_ok=True)
-        print('here',type(torch.load(best_model)))
+        print("here", type(torch.load(best_model)))
         torch.save(torch.load(best_model), best_model_filepath)
-        
 
 
 if __name__ == "__main__":

@@ -10,13 +10,14 @@ from torch.utils.data import TensorDataset
 
 from omegaconf import OmegaConf
 
+
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
 def main(input_filepath, output_filepath):
 
     # loading nb_files in configuration
-    config = OmegaConf.load('src/config/data_conf.yaml')
+    config = OmegaConf.load("src/config/data_conf.yaml")
     nb_files = config.nb_files
 
     """Runs data processing scripts to turn raw data from (../raw) into

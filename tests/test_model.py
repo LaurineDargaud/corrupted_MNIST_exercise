@@ -9,13 +9,17 @@ import os
 
 from pytorch_lightning import Trainer
 
-@pytest.mark.skipif(not os.path.exists(f'{_PATH_DATA}/processed/test_dataset.pth'), reason="Data files not found")
+
+@pytest.mark.skipif(
+    not os.path.exists(f"{_PATH_DATA}/processed/test_dataset.pth"),
+    reason="Data files not found",
+)
 def test_input_output_model_shapes():
-    " Check for a given input with shape X that the output of the model have shape Y"
+    "Check for a given input with shape X that the output of the model have shape Y"
     # load model
     model = MyAwesomeModel(torch.nn.NLLLoss(), torch.optim.SGD, 0.1)
     # load test data loader
-    test_dataset = torch.load(f'{_PATH_DATA}/processed/test_dataset.pth')
+    test_dataset = torch.load(f"{_PATH_DATA}/processed/test_dataset.pth")
     testloader = DataLoader(test_dataset, batch_size=64, shuffle=True)
     # make a prediction
     test_features, test_labels = next(iter(testloader))
@@ -24,11 +28,12 @@ def test_input_output_model_shapes():
     print(preds.shape)
     # check sizes of input features and output label predictions
     N = test_features.shape[0]
-    assert test_features.shape == torch.Size([N,28,28])
-    assert preds.shape == torch.Size([N,1])
+    assert test_features.shape == torch.Size([N, 28, 28])
+    assert preds.shape == torch.Size([N, 1])
+
 
 def test_error_on_wrong_shape():
-    with pytest.raises(ValueError, match='Expected input to a 3D tensor'):  
+    with pytest.raises(ValueError, match="Expected input to a 3D tensor"):
         # load model
         model = MyAwesomeModel(torch.nn.NLLLoss(), torch.optim.SGD, 0.1)
-        model(torch.randn(1,2))
+        model(torch.randn(1, 2))

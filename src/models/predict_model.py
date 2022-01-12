@@ -2,13 +2,12 @@ import argparse
 import os
 import sys
 
-import numpy as np
-
 import torch
 from torch.utils.data import DataLoader
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
+
 
 class predict_model(object):
     """Test a trained model on a test dataset then display obtained accuracy"""
@@ -37,15 +36,15 @@ class predict_model(object):
         )
         testloader = DataLoader(test_dataset, batch_size=64, shuffle=True)
 
-        print('here',args.load_model_from)
+        print("here", args.load_model_from)
 
         # get trainer
         trainer = Trainer(
             default_root_dir=os.getcwd(),
-            logger=WandbLogger(project="corrupted_MNIST_exercise-src_models")
+            logger=WandbLogger(project="corrupted_MNIST_exercise-src_models"),
         )
         trainer.test(model, dataloaders=testloader)
-        
+
 
 if __name__ == "__main__":
     predict_model()

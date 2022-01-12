@@ -2,13 +2,13 @@ import argparse
 import os
 import sys
 
-import numpy as np
-
 import torch
 from torch.utils.data import DataLoader
 
 import wandb
+
 wandb.init()
+
 
 class predict_model(object):
     """Test a trained model on a test dataset then display obtained accuracy"""
@@ -41,7 +41,7 @@ class predict_model(object):
         with torch.no_grad():
             # set model to evaluation mode
             model = model.eval()
-            all_equals= []
+            all_equals = []
             log_done = False
             for images, labels in testloader:
                 probas = torch.exp(model(images))
@@ -49,25 +49,29 @@ class predict_model(object):
                 equals = top_class == labels.view(*top_class.shape)
                 all_equals.append(equals)
                 # save 64 first predictions to log
-                if (not log_done):
+                if not log_done:
                     # logging predictions
-                    my_table = wandb.Table(columns=['n°','label','image','prediction'])
+                    my_table = wandb.Table(
+                        columns=["n°", "label", "image", "prediction"]
+                    )
 
                     np_images = images.numpy()
-                    for i in range (len(np_images)):
-                        my_table.add_data(i,labels[i].item(), wandb.Image(np_images[i]), top_class[i].item())
-                    
-                    wandb.log({"mnist predictions":my_table})
-                    print('Wandb Log - done')
-                    
+                    for i in range(len(np_images)):
+                        my_table.add_data(
+                            i,
+                            labels[i].item(),
+                            wandb.Image(np_images[i]),
+                            top_class[i].item(),
+                        )
+
+                    wandb.log({"mnist predictions": my_table})
+                    print("Wandb Log - done")
+
                     log_done = True
 
             equals = torch.cat(all_equals, 0)
             accuracy = torch.mean(equals.type(torch.FloatTensor)).item()
             print(f"Accuracy: {round(accuracy*100,2)}%")
-
-        
-
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from omegaconf import OmegaConf
 
 import wandb
+
 wandb.init()
 
 
@@ -21,7 +22,7 @@ class train_model(object):
 
     def __init__(self):
         # loading training configuration
-        config = OmegaConf.load('src/config/training_conf.yaml')
+        config = OmegaConf.load("src/config/training_conf.yaml")
         self.hparams = config.hyperparameters
 
         self.train()
@@ -29,12 +30,12 @@ class train_model(object):
     def train(self):
         print("Training day and night")
         parser = argparse.ArgumentParser(description="Training arguments")
-        parser.add_argument("--lr", default=self.hparams['lr'], type=float)
+        parser.add_argument("--lr", default=self.hparams["lr"], type=float)
         # add any additional argument that you want
-        parser.add_argument("--nb_epochs", default=self.hparams['nb_epochs'], type=int)
-        parser.add_argument("--save_file", default=self.hparams['save_file'])
-        parser.add_argument("--criterion", default=self.hparams['criterion'])
-        parser.add_argument("--optimizer", default=self.hparams['optimizer'])
+        parser.add_argument("--nb_epochs", default=self.hparams["nb_epochs"], type=int)
+        parser.add_argument("--save_file", default=self.hparams["save_file"])
+        parser.add_argument("--criterion", default=self.hparams["criterion"])
+        parser.add_argument("--optimizer", default=self.hparams["optimizer"])
         args = parser.parse_args(sys.argv[1:])
         print(args)
 
@@ -49,7 +50,9 @@ class train_model(object):
         train_dataset = torch.load(
             os.path.abspath(__file__ + "/../../../data/processed/train_dataset.pth")
         )
-        trainloader = DataLoader(train_dataset, batch_size=self.hparams['batch_size'], shuffle=True)
+        trainloader = DataLoader(
+            train_dataset, batch_size=self.hparams["batch_size"], shuffle=True
+        )
 
         criterion = eval(f"torch.nn.{args.criterion}()")
         optimizer = eval(
@@ -101,7 +104,7 @@ class train_model(object):
             plt.xlabel("Steps")
             plt.ylabel("Training Loss")
             plt.title(
-                f"Training Loss evolution using {args.criterion} criterion,{args.optimizer} optimizer and {args.nb_epochs} epochs",
+                f"Training Loss using {args.criterion} criterion,{args.optimizer} optimizer and {args.nb_epochs} epochs",
                 size=10,
             )
             # create 'reports/figures' folder if it doesn't exist

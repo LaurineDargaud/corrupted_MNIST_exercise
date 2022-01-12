@@ -2,26 +2,27 @@ from pytorch_lightning import LightningModule
 
 import torch
 import torch.nn.functional as F
-from torch import nn, optim
+from torch import nn
 from torch import Tensor
 
 from omegaconf import OmegaConf
 
 import wandb
 
+
 class MyAwesomeModel(LightningModule):
     def __init__(self, aCriterium, anOptimizer, aLrCoeff):
         super().__init__()
         # get hyperparameters
-        config = OmegaConf.load('src/config/model_conf.yaml')
+        config = OmegaConf.load("src/config/model_conf.yaml")
         hparams = config.hyperparameters
-        self.fc1 = nn.Linear(hparams['input_size'], hparams['layer1_size'])
+        self.fc1 = nn.Linear(hparams["input_size"], hparams["layer1_size"])
         # self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(hparams['layer1_size'], hparams['layer2_size'])
-        self.fc4 = nn.Linear(hparams['layer2_size'], hparams['output_size'])
+        self.fc3 = nn.Linear(hparams["layer1_size"], hparams["layer2_size"])
+        self.fc4 = nn.Linear(hparams["layer2_size"], hparams["output_size"])
 
         # Dropout module with 0.2 drop probability
-        self.dropout = nn.Dropout(p=hparams['p_dropout'])
+        self.dropout = nn.Dropout(p=hparams["p_dropout"])
 
         # Define criterium
         self.criterium = aCriterium
@@ -32,9 +33,9 @@ class MyAwesomeModel(LightningModule):
 
     def forward(self, x: Tensor):
         if x.ndim != 3:
-            raise ValueError('Expected input to a 3D tensor')
-        if x.shape[1] != 28 or x.shape[2] != 28 :
-            raise ValueError('Expected each sample to have shape [28, 28]')
+            raise ValueError("Expected input to a 3D tensor")
+        if x.shape[1] != 28 or x.shape[2] != 28:
+            raise ValueError("Expected each sample to have shape [28, 28]")
         # make sure input tensor is flattened
         x = x.view(x.shape[0], -1)
 
@@ -67,44 +68,44 @@ class MyAwesomeModel(LightningModule):
         x2 = self.dropout(F.relu(self.fc3(x1)))
 
         return x1, x2
-    
+
     def _shared_eval_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
         loss = self.criterium(preds, target)
         acc = (target == preds.argmax(dim=-1)).float().mean()
         return loss, acc
-    
+
     def training_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
         loss = self.criterium(preds, target)
         # compute and log training metrics
         loss, acc = self._shared_eval_step(batch, batch_idx)
-        metrics = {"train_acc":acc, "train_loss":loss}
+        metrics = {"train_acc": acc, "train_loss": loss}
         self.log_dict(metrics)
         return loss
-    
+
     def configure_optimizers(self):
         return self.optimizer(self.parameters(), lr=self.lr)
-    
+
     def validation_step(self, batch, batch_idx):
         # compute and log validation metrics
         loss, acc = self._shared_eval_step(batch, batch_idx)
-        metrics = {"val_acc":acc, "val_loss":loss}
+        metrics = {"val_acc": acc, "val_loss": loss}
         self.log_dict(metrics)
         #  logging something else than scalar tensors
         preds = self.predict_step(batch, batch_idx)
-        self.logger.experiment.log({'logits': wandb.Histogram(preds.detach().numpy())})
+        self.logger.experiment.log({"logits": wandb.Histogram(preds.detach().numpy())})
         return metrics
-    
+
     def test_step(self, batch, batch_idx):
         # compute and log test metrics
         loss, acc = self._shared_eval_step(batch, batch_idx)
-        metrics = {"test_acc":acc, "test_loss":loss}
+        metrics = {"test_acc": acc, "test_loss": loss}
         self.log_dict(metrics)
         return metrics
-    
+
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         data, _ = batch
         preds = self(data)
