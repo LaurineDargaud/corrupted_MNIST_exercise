@@ -1,10 +1,8 @@
 [core]
-    remote = remote_storage2
+    remote = remote_storage
 ['remote "storage"']
     url = gdrive://1AQ8PeTpOrRUyHy8VKNqCcCtKc6Wr0AGV
     gdrive_client_id = 703091286539-ktqs188ul9cffotfpm4a754lkeceo1p4.apps.googleusercontent.com
     gdrive_client_secret = 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
 ['remote "remote_storage"']
     url = gs://mnist_images_bucket/
-['remote "remote_storage2"']
-    url = gs://mnist_images_bucket_2/
